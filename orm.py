@@ -5,7 +5,6 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 DATABASE = path.join(path.dirname(__file__), 'data/chord-search.db')
 engine = create_engine('sqlite:///{0}'.format(DATABASE), echo=True)
-print(DATABASE)
 Base = declarative_base()
 
 song_chord = Table('song_chord', Base.metadata,
@@ -17,6 +16,7 @@ song_chord = Table('song_chord', Base.metadata,
 class Song(Base):
     __tablename__ = 'song'
     id = Column(Integer(), primary_key=True, nullable=False, autoincrement=True)
+    artist = Column(String(length=200))
     name = Column(String(length=200), nullable=False)
     url = Column(String(length=200), nullable=False)
     rating = Column(Integer())
@@ -30,14 +30,10 @@ class Chord(Base):
     name = Column(String(length=50), nullable=False)
 
 
-print('keke')
 Session = sessionmaker(bind=engine)
 Session.configure(bind=engine)
 dbsession = Session()
 if not path.exists(DATABASE):
-    print('hoyte')
     if not path.exists(path.dirname(DATABASE)):
         mkdir(path.dirname(DATABASE))
     Base.metadata.create_all(engine)
-    print('hoyte2')
-print('kekelek')
