@@ -34,3 +34,12 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# PyCharm
+.idea
+
+# data
+*.db
+
+# virtualenv
+_ENV
