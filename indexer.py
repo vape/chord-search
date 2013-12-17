@@ -1,17 +1,20 @@
 from xml.etree import ElementTree as ET
+from datetime import datetime
+
 from requests import get
 from re import search, compile
 from bs4 import BeautifulSoup
-from orm import dbsession, Song, Chord
-from datetime import datetime
-from sqlalchemy import not_
+from orm import dbsession, Song, Chord, IndexingJob
+from sqlalchemy import not_, desc
+
 
 ns_clean_re = compile(r'xmlns=\".*\"')
 chord_url_re = compile(r'.*_crd\.htm$')
-rating_re = compile(r'x\s*(\d+)')
 song_title_clean_re = compile(r' Chords$')
 
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36'}
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36'}
+vote_map = {'poor': 1, 'not so good': 2, 'worth learning': 3, 'accurate': 4, 'excellent!': 5}
 
 
 def get_sitemaps():
@@ -19,19 +22,21 @@ def get_sitemaps():
     return [l.text for l in root.findall('sitemap/loc') if search(r'sitemap\d+\.xml$', l.text)]
 
 
-def get_chord_urls(sitemap_url):
+def get_song_page_urls(sitemap_url, from_date):
     root = ET.fromstring(ns_clean_re.sub('', get(sitemap_url, headers=headers).text))
-    return [u.text for u in root.findall('url/loc') if chord_url_re.search(u.text)]
+    return [u.find('loc').text for u in root.findall('url') if
+            chord_url_re.search(u.find('loc').text) and
+            datetime.strptime(u.find('lastmod').text, '%Y-%m-%d') > from_date]
 
 
 def get_song_data(song_url):
+    print('getting song data for', song_url)
     soup = BeautifulSoup(get(song_url, headers=headers).text)
     chords = list(set([c.text for c in soup.select('#cont span')]))
 
     title = song_title_clean_re.sub('', soup.select('.t_title h1')[0].text)
     artist = soup.select('.t_autor a')[0].text
-    rt_match = rating_re.match(soup.select('.raiting .v_c')[0].text.strip())
-    rating = int(rt_match.group(1)) if rt_match else None
+    rating = vote_map.get(soup.select('.vote-success')[0].text, None)
     song = Song(artist=artist, name=title, url=song_url, rating=rating, created_date=datetime.now())
     return song, chords
 
@@ -43,12 +48,51 @@ def get_songs_with_chords(chords):
     return q1.except_(q2).all()
 
 
-def main():
-    #sitemaps = get_sitemaps()
-    #urls = get_chord_urls(sitemaps[-1])
-    #[print(u) for u in urls]
-    #print(get_song_data('http://tabs.ultimate-guitar.com/o/oasis/a_bell_will_ring_crd.htm'))
+def insert_chords(chords):
+    for c in chords:
+        chord = dbsession.query(Chord).filter(Chord.name == c).first()
+        if not chord:
+            chord = Chord(name=c)
+            dbsession.add(chord)
+    dbsession.commit()
+    return dbsession.query(Chord).all()
 
+
+def index_chords(songs):
+    song_chords = []
+    for s in songs:
+        song_chords.extend(s[1])
+    return insert_chords(list(set(song_chords)))
+
+
+def index_songs(songs):
+    all_chords = index_chords(songs)
+    for s in songs:
+        if not s[1]:
+            continue
+
+        song = dbsession.query(Song).filter(Song.url == s[0].url).first()
+        if not song:
+            song = s[0]
+            song.chords = [c for c in all_chords if c.name in s[1]]
+            dbsession.add(song)
+
+    dbsession.commit()
+
+
+def main():
+    job_start_date = datetime.now()
+    last_run = dbsession.query(IndexingJob).order_by(desc(IndexingJob.run_date)).first()
+    last_run_date = last_run.run_date if last_run else datetime(2010, 1, 1)
+    print(last_run_date)
+    sitemaps = get_sitemaps()
+    urls = get_song_page_urls(sitemaps[-1], last_run_date)
+    print(len(urls))
+    songs = [get_song_data(u) for u in urls[:20]]
+    index_songs(songs)
+
+    dbsession.add(IndexingJob(run_date=job_start_date))
+    dbsession.commit()
 
 
 if __name__ == '__main__':

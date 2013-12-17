@@ -18,7 +18,7 @@ class Song(Base):
     id = Column(Integer(), primary_key=True, nullable=False, autoincrement=True)
     artist = Column(String(length=200))
     name = Column(String(length=200), nullable=False)
-    url = Column(String(length=200), nullable=False)
+    url = Column(String(length=200), nullable=False, unique=True)
     rating = Column(Integer())
     created_date = Column(DateTime(), nullable=False)
     chords = relationship('Chord', secondary=song_chord, backref='songs')
@@ -27,7 +27,19 @@ class Song(Base):
 class Chord(Base):
     __tablename__ = 'chord'
     id = Column(Integer(), primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String(length=50), nullable=False)
+    name = Column(String(length=50), nullable=False, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '{0}({1})'.format(self.__class__, self.name)
+
+
+class IndexingJob(Base):
+    __tablename__ = 'indexing_job'
+    id = Column(Integer(), primary_key=True, nullable=False, autoincrement=True)
+    run_date = Column(DateTime(), nullable=False)
 
 
 Session = sessionmaker(bind=engine)
