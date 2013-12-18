@@ -6,6 +6,8 @@ from re import search, compile
 from bs4 import BeautifulSoup
 from orm import dbsession, Song, Chord, IndexingJob
 from sqlalchemy import not_, desc
+from sys import stdout
+from os import path
 
 
 ns_clean_re = compile(r'xmlns=\".*\"')
@@ -30,7 +32,7 @@ def get_song_page_urls(sitemap_url, from_date):
 
 
 def get_song_data(song_url):
-    print('getting song data for', song_url)
+    #print('getting song data for', song_url)
     try:
         r = get(song_url, headers=headers)
         if r.status_code != 200:
@@ -89,6 +91,18 @@ def index_songs(songs):
     dbsession.commit()
 
 
+def report_progress(num_songs, song_index, song_url, start_time):
+    elapsed = (datetime.now() - start_time).total_seconds()
+    time_per_song = elapsed / (song_index + 1)
+    est_time_remaining = (num_songs - (song_index + 1)) * time_per_song / 60
+    stdout.write('\rSong {0} of {1}. {3:.2f} min. remaining. Last song: {2}.'.format(
+        song_index + 1,
+        num_songs,
+        path.splitext(path.basename(song_url))[0],
+        est_time_remaining))
+    stdout.flush()
+
+
 def main():
     job_start_date = datetime.now()
     last_run = dbsession.query(IndexingJob).order_by(desc(IndexingJob.run_date)).first()
@@ -96,8 +110,13 @@ def main():
     print(last_run_date)
     sitemaps = get_sitemaps()
     urls = get_song_page_urls(sitemaps[-1], last_run_date)
-    print(len(urls))
-    songs = [get_song_data(u) for u in urls]
+    num_songs = len(urls)
+    songs = []
+    start_time = datetime.now()
+    for i, u in enumerate(urls):
+        songs.append(get_song_data(u))
+        report_progress(num_songs, i, u, start_time)
+
     index_songs([s for s in songs if s[1]])
 
     dbsession.add(IndexingJob(run_date=job_start_date))
