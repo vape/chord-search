@@ -31,14 +31,21 @@ def get_song_page_urls(sitemap_url, from_date):
 
 def get_song_data(song_url):
     print('getting song data for', song_url)
-    soup = BeautifulSoup(get(song_url, headers=headers).text)
-    chords = list(set([c.text for c in soup.select('#cont span')]))
+    try:
+        r = get(song_url, headers=headers)
+        if r.status_code != 200:
+            return None, None
 
-    title = song_title_clean_re.sub('', soup.select('.t_title h1')[0].text)
-    artist = soup.select('.t_autor a')[0].text
-    rating = vote_map.get(soup.select('.vote-success')[0].text, None)
-    song = Song(artist=artist, name=title, url=song_url, rating=rating, created_date=datetime.now())
-    return song, chords
+        soup = BeautifulSoup(r.text)
+        chords = list(set([c.text for c in soup.select('#cont span')]))
+        title = song_title_clean_re.sub('', soup.select('.t_title h1')[0].text)
+        artist = soup.select('.t_autor a')[0].text
+        rating = vote_map.get(soup.select('.vote-success')[0].text, None)
+        song = Song(artist=artist, name=title, url=song_url, rating=rating, created_date=datetime.now())
+        return song, chords
+    except Exception as ex:
+        print('Some exception:', ex)
+        return None, None
 
 
 def get_songs_with_chords(chords):
@@ -68,14 +75,17 @@ def index_chords(songs):
 def index_songs(songs):
     all_chords = index_chords(songs)
     for s in songs:
-        if not s[1]:
-            continue
+        try:
+            if not s[1]:
+                continue
 
-        song = dbsession.query(Song).filter(Song.url == s[0].url).first()
-        if not song:
-            song = s[0]
-            song.chords = [c for c in all_chords if c.name in s[1]]
-            dbsession.add(song)
+            song = dbsession.query(Song).filter(Song.url == s[0].url).first()
+            if not song:
+                song = s[0]
+                song.chords = [c for c in all_chords if c.name in s[1]]
+                dbsession.add(song)
+        except Exception as ex:
+            print('some error:', ex)
 
     dbsession.commit()
 
@@ -88,7 +98,7 @@ def main():
     sitemaps = get_sitemaps()
     urls = get_song_page_urls(sitemaps[-1], last_run_date)
     print(len(urls))
-    songs = [get_song_data(u) for u in urls[:20]]
+    songs = [get_song_data(u) for u in urls]
     index_songs(songs)
 
     dbsession.add(IndexingJob(run_date=job_start_date))
