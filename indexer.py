@@ -67,8 +67,7 @@ def insert_chords(chords):
 
 def index_chords(songs):
     song_chords = []
-    for s in songs:
-        song_chords.extend(s[1])
+    [song_chords.extend(s[1]) for s in songs if s[1]]
     return insert_chords(list(set(song_chords)))
 
 
@@ -99,7 +98,7 @@ def main():
     urls = get_song_page_urls(sitemaps[-1], last_run_date)
     print(len(urls))
     songs = [get_song_data(u) for u in urls]
-    index_songs(songs)
+    index_songs([s for s in songs if s[1]])
 
     dbsession.add(IndexingJob(run_date=job_start_date))
     dbsession.commit()
