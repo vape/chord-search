@@ -36,10 +36,16 @@ nosetests.xml
 .pydevproject
 
 # PyCharm
+# http://www.jetbrains.com/pycharm/webhelp/project.html
 .idea
+.iml
 
 # data
 *.db
 
 # virtualenv
 _ENV
+
+# Project specific
+# the env.yaml file contains the database credentials, so it should not go into source control
+env.yaml

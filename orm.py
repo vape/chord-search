@@ -1,10 +1,12 @@
-from os import path, mkdir
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from config import initialize_config
+from os import environ
 
-DATABASE = path.join(path.dirname(__file__), 'data/chord-search.db')
-engine = create_engine('sqlite:///{0}'.format(DATABASE), echo=True)
+initialize_config()
+
+engine = create_engine('postgresql://{DBUSER}:{DBPASS}@{DBSERVER}:{DBPORT}/{DBNAME}'.format(**environ), echo=True)
 Base = declarative_base()
 
 song_chord = Table('song_chord', Base.metadata,
@@ -45,7 +47,4 @@ class IndexingJob(Base):
 Session = sessionmaker(bind=engine)
 Session.configure(bind=engine)
 dbsession = Session()
-if not path.exists(DATABASE):
-    if not path.exists(path.dirname(DATABASE)):
-        mkdir(path.dirname(DATABASE))
-    Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)
