@@ -95,11 +95,12 @@ def report_progress(num_songs, song_index, song_url, start_time):
     elapsed = (datetime.now() - start_time).total_seconds()
     time_per_song = elapsed / (song_index + 1)
     est_time_remaining = (num_songs - (song_index + 1)) * time_per_song / 60
-    stdout.write('\rSong {0} of {1}. {3:.2f} min. remaining. Last song: {2}.'.format(
+    stdout.write('\rSong {0} of {1}. Elapsed: {2:.2f} min. Remaining: {3:.2f} min. Last song: {4}.'.format(
         song_index + 1,
         num_songs,
-        path.splitext(path.basename(song_url))[0],
-        est_time_remaining))
+        elapsed / 60,
+        est_time_remaining,
+        path.splitext(path.basename(song_url))[0]))
     stdout.flush()
 
 
