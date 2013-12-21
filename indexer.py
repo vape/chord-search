@@ -32,7 +32,6 @@ def get_song_page_urls(sitemap_url, from_date):
 
 
 def get_song_data(song_url):
-    #print('getting song data for', song_url)
     try:
         r = get(song_url, headers=headers)
         if r.status_code != 200:
@@ -108,10 +107,10 @@ def main():
     job_start_date = datetime.now()
     last_run = dbsession.query(IndexingJob).order_by(desc(IndexingJob.run_date)).first()
     last_run_date = last_run.run_date if last_run else datetime(2010, 1, 1)
-    print(last_run_date)
     sitemaps = get_sitemaps()
     urls = get_song_page_urls(sitemaps[-1], last_run_date)
     num_songs = len(urls)
+
     songs = []
     start_time = datetime.now()
     for i, u in enumerate(urls):
