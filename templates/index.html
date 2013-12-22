@@ -2,10 +2,17 @@
 {% block body %}
 <div class="row">
 
-    <form role="form">
+    <form role="form" class="form-horizontal" method="get" action="{{ url_for('search') }}">
         <div class="input-group col-lg-6 center-block">
             <input type="text" class="form-control input-lg" id="q" placeholder="Artist or song name">
             <button type="submit" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-search"></span></button>
+        </div>
+        <div class="input-group col-lg-6 center-block">
+            <select multiple name="crd" id="crd" style="width: 90%">
+                {% for ch in chords %}
+                <option value="{{ ch.id }}">{{ ch.name }}</option>
+                {% endfor %}
+            </select>
         </div>
     </form>
 
