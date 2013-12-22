@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+    <title>Pytodo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/todc-bootstrap.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/chord-search.css') }}">
+</head>
+<body>
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-music"></span> Chord Search</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    {% block body %}{% endblock %}
+</div>
+<!-- /.container -->
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.0.3.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/chord-search.js') }}"></script>
+</body>
+</html>
