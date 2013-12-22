@@ -1,10 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
-    <div class="jumbotron">
-        <h1>Welcome to Pytodo</h1>
-        <p>Sign up in 5 seconds and start using.</p>
-        <p>
-          <a class="btn btn-lg btn-primary" href="/login" role="button">Login with Facebook &raquo;</a>
-        </p>
-      </div>
+<div class="row">
+
+    <form role="form">
+        <div class="input-group col-lg-6 center-block">
+            <input type="text" class="form-control input-lg" id="q" placeholder="Artist or song name">
+            <button type="submit" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-search"></span></button>
+        </div>
+    </form>
+
+</div>
 {% endblock %}
