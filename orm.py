@@ -6,7 +6,7 @@ from os import environ
 
 initialize_config()
 
-engine = create_engine('postgresql://{DBUSER}:{DBPASS}@{DBSERVER}:{DBPORT}/{DBNAME}'.format(**environ), echo=False)
+engine = create_engine('postgresql://{DBUSER}:{DBPASS}@{DBSERVER}:{DBPORT}/{DBNAME}'.format(**environ), echo=True)
 Base = declarative_base()
 
 song_chord = Table('song_chord', Base.metadata,
@@ -24,6 +24,12 @@ class Song(Base):
     rating = Column(Integer())
     created_date = Column(DateTime(), nullable=False, index=True)
     chords = relationship('Chord', secondary=song_chord, backref='songs')
+
+    def __str__(self):
+        return '"{0}" by {1}'.format(self.name, self.artist)
+
+    def __repr__(self):
+        return '{0}({1})'.format(self.__class__, self.name)
 
 
 class Chord(Base):

@@ -49,13 +49,6 @@ def get_song_data(song_url):
         return None, None
 
 
-def get_songs_with_chords(chords):
-    chords = chords if isinstance(chords, list) else [chords]
-    q1 = dbsession.query(Song).join(Song.chords).filter(Chord.name.in_(chords))
-    q2 = dbsession.query(Song).join(Song.chords).filter(not_(Chord.name.in_(chords)))
-    return q1.except_(q2).all()
-
-
 def insert_chords(chords):
     for c in chords:
         chord = dbsession.query(Chord).filter(Chord.name == c).first()

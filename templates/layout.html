@@ -22,7 +22,7 @@
     <div class="row" id="search">
         <form role="form" class="form-horizontal" method="get" action="{{ url_for('search') }}">
             <div class="input-group col-lg-6 center-block">
-                <input type="text" class="form-control input-lg" id="q" name="q" placeholder="Artist or song name" value="{{ request.args.get('q', '') }}">
+                <input type="text" class="form-control input-lg" id="q" name="q" placeholder="Artist or song name (optional)" value="{{ request.args.get('q', '') }}">
                 <button type="submit" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-search"></span></button>
             </div>
             <div class="input-group col-lg-6 center-block">

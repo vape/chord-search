@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="panel panel-default">
+    <div class="panel-body">
+    {{ results|length }} results ({{ "%.3f"|format(elapsed) }} seconds)
+    </div>
+</div>
+<ul class="search-results">
+    {% for res in results %}
+    <li>
+        <div>
+            <h3><a target="_blank" title="{{ res.name }} by {{ res.artist }}" href="{{ res.url }}">{{ res.name }} by {{
+                res.artist }}</a></h3>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

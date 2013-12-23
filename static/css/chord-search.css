@@ -6,3 +6,11 @@
 .input-group {
     margin-top: 10px;
 }
+
+ul.search-results {
+    list-style-type: none;
+}
+
+#search {
+    margin-bottom: 10px;
+}
