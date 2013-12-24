@@ -1,6 +1,5 @@
 #q {
     display: inline-block;
-    width: 90%;
 }
 
 .input-group {
@@ -13,4 +12,8 @@ ul.search-results {
 
 #search {
     margin-bottom: 10px;
+}
+
+.panel-body {
+    padding: 10px 20px;
 }

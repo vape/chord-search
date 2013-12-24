@@ -5,6 +5,7 @@ $(document).ready(function () {
     $("#crd").select2({
         width: 'element',
         placeholder: 'Chords',
+        openOnEnter: false,
         allowClear: true
     });
 });

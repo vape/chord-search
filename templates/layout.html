@@ -23,14 +23,14 @@
         <form role="form" class="form-horizontal" method="get" action="{{ url_for('search') }}">
             <div class="input-group col-lg-6 center-block">
                 <input type="text" class="form-control input-lg" id="q" name="q" placeholder="Artist or song name (optional)" value="{{ request.args.get('q', '') }}" tabindex="1">
-                <button type="submit" class="btn btn-primary btn-lg" tabindex="3"><span class="glyphicon glyphicon-search"></span></button>
             </div>
             <div class="input-group col-lg-6 center-block">
-                <select multiple name="crd" id="crd" style="width: 90%" tabindex="3">
+                <select multiple name="crd" id="crd" style="width: 92%" tabindex="2">
                     {% for ch in chords %}
                     <option value="{{ ch.id }}" {{ 'selected' if ch.id in sel_chords else '' }}>{{ ch.name }}</option>
                     {% endfor %}
                 </select>
+                <button type="submit" class="btn btn-primary" tabindex="3" title="Search"><span class="glyphicon glyphicon-search"></span></button>
             </div>
         </form>
     </div>
