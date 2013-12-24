@@ -22,11 +22,11 @@
     <div class="row" id="search">
         <form role="form" class="form-horizontal" method="get" action="{{ url_for('search') }}">
             <div class="input-group col-lg-6 center-block">
-                <input type="text" class="form-control input-lg" id="q" name="q" placeholder="Artist or song name (optional)" value="{{ request.args.get('q', '') }}">
-                <button type="submit" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-search"></span></button>
+                <input type="text" class="form-control input-lg" id="q" name="q" placeholder="Artist or song name (optional)" value="{{ request.args.get('q', '') }}" tabindex="1">
+                <button type="submit" class="btn btn-primary btn-lg" tabindex="3"><span class="glyphicon glyphicon-search"></span></button>
             </div>
             <div class="input-group col-lg-6 center-block">
-                <select multiple name="crd" id="crd" style="width: 90%">
+                <select multiple name="crd" id="crd" style="width: 90%" tabindex="3">
                     {% for ch in chords %}
                     <option value="{{ ch.id }}" {{ 'selected' if ch.id in sel_chords else '' }}>{{ ch.name }}</option>
                     {% endfor %}
