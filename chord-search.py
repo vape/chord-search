@@ -6,6 +6,7 @@ from orm import dbsession, Chord, Song
 from sqlalchemy import not_
 from lib.template_helpers import url_for_other_page
 from os import path
+from config import is_debug
 
 app = Flask(__name__)
 app.jinja_env.globals['url_for_other_page'] = url_for_other_page
@@ -81,4 +82,4 @@ def search():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=is_debug())

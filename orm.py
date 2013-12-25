@@ -1,12 +1,12 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from config import initialize_config
+from config import initialize_config, is_debug
 from os import environ
 
 initialize_config()
 
-engine = create_engine('postgresql://{DBUSER}:{DBPASS}@{DBSERVER}:{DBPORT}/{DBNAME}'.format(**environ), echo=True)
+engine = create_engine('postgresql://{DBUSER}:{DBPASS}@{DBSERVER}:{DBPORT}/{DBNAME}'.format(**environ), echo=is_debug())
 Base = declarative_base()
 
 song_chord = Table('song_chord', Base.metadata,
