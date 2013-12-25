@@ -1,5 +1,5 @@
 from xml.etree import ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from requests import get
 from re import search, compile
@@ -106,29 +106,32 @@ def _parse_args():
 def _get_last_run_date(mode):
     if mode == 'latest':
         last_run = dbsession.query(IndexingJob).order_by(desc(IndexingJob.run_date)).first()
-        last_run_date = last_run.run_date if last_run else datetime(2010, 1, 1)
+        last_run_date = last_run.run_date if last_run else datetime(2010, 1, 1) - timedelta(7)
     else:
         last_run_date = datetime(2010, 1, 1)
     return last_run_date
 
 
+def _get_song_urls(mode, sitemaps):
+    last_run_date = _get_last_run_date(mode)
+    sitemaps = [sitemaps[-1]] if mode == 'latest' else sitemaps[::-1]
+    for s in sitemaps:
+        yield get_song_page_urls(s, last_run_date)
+
+
 def main():
     args = _parse_args()
     job_start_date = datetime.now()
-    last_run_date = _get_last_run_date(args.mode)
 
-    sitemaps = get_sitemaps()
-    urls = []
-    [urls.extend(get_song_page_urls(s, last_run_date)) for s in sitemaps[::-1]]
-    num_songs = len(urls)
+    for urls in _get_song_urls(args.mode, get_sitemaps()):
+        num_songs = len(urls)
+        songs = []
+        start_time = datetime.now()
+        for i, u in enumerate(urls):
+            songs.append(get_song_data(u))
+            report_progress(num_songs, i, u, start_time)
 
-    songs = []
-    start_time = datetime.now()
-    for i, u in enumerate(urls[:200]):
-        songs.append(get_song_data(u))
-        report_progress(num_songs, i, u, start_time)
-
-    index_songs([s for s in songs if s[1]])
+        index_songs([s for s in songs if s[1]])
 
     dbsession.add(IndexingJob(run_date=job_start_date))
     dbsession.commit()
