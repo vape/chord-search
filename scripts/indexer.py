@@ -5,9 +5,10 @@ from requests import get
 from re import search, compile
 from bs4 import BeautifulSoup
 from orm import dbsession, Song, Chord, IndexingJob
-from sqlalchemy import not_, desc
+from sqlalchemy import desc
 from sys import stdout
 from os import path
+from argparse import ArgumentParser
 
 
 ns_clean_re = compile(r'xmlns=\".*\"')
@@ -96,12 +97,29 @@ def report_progress(num_songs, song_index, song_url, start_time):
     stdout.flush()
 
 
+def _parse_args():
+    parser = ArgumentParser()
+    parser.add_argument('mode', choices=['latest', 'full'], default='latest')
+    return parser.parse_args()
+
+
+def _get_last_run_date(mode):
+    if mode == 'latest':
+        last_run = dbsession.query(IndexingJob).order_by(desc(IndexingJob.run_date)).first()
+        last_run_date = last_run.run_date if last_run else datetime(2010, 1, 1)
+    else:
+        last_run_date = datetime(2010, 1, 1)
+    return last_run_date
+
+
 def main():
+    args = _parse_args()
     job_start_date = datetime.now()
-    last_run = dbsession.query(IndexingJob).order_by(desc(IndexingJob.run_date)).first()
-    last_run_date = last_run.run_date if last_run else datetime(2010, 1, 1)
+    last_run_date = _get_last_run_date(args.mode)
+
     sitemaps = get_sitemaps()
-    urls = get_song_page_urls(sitemaps[-1], last_run_date)
+    urls = []
+    [urls.extend(get_song_page_urls(s, last_run_date)) for s in sitemaps[::-1]]
     num_songs = len(urls)
 
     songs = []
