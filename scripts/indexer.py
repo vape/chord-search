@@ -135,7 +135,7 @@ def main():
         total_song_count += num_songs
         songs = []
         start_time = datetime.now()
-        for i, u in enumerate(urls[:20]):
+        for i, u in enumerate(urls):
             songs.append(get_song_data(u))
             report_progress(num_songs, i, u, start_time)
 
