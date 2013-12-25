@@ -6,8 +6,9 @@ from os import environ
 
 initialize_config()
 
-engine = create_engine('postgresql://{DBUSER}:{DBPASS}@{DBSERVER}:{DBPORT}/{DBNAME}'.format(**environ), echo=is_debug())
 Base = declarative_base()
+engine = create_engine('postgresql://{DBUSER}:{DBPASS}@{DBSERVER}:{DBPORT}/{DBNAME}'.format(**environ),
+                       echo=is_debug())
 
 song_chord = Table('song_chord', Base.metadata,
                    Column('song_id', Integer, ForeignKey('song.id'), index=True),

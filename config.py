@@ -1,19 +1,20 @@
 import yaml
 from os import path, environ
 
+
 def contains(small, big):
     for v in small:
         if v not in big:
             return False
     return True
 
+
 def is_debug():
     return environ.get('DEBUG', 'False') != 'False'
 
+
 def initialize_config(config_file_name='env.yaml'):
     config_keys = ['DBSERVER', 'DBNAME', 'DBUSER', 'DBPASS', 'DBPORT']
-    print(config_keys)
-    print(list(environ.keys()))
     if contains(config_keys, list(environ.keys())):
         environ['DEBUG'] = 'False'
         return
