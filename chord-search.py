@@ -42,9 +42,21 @@ def _search(q, chords, page=1):
     return res, cnt, (end - st).total_seconds()
 
 
+def _get_stats():
+    return {
+        'song_count': dbsession.query(Song).count(),
+        'chord_count': dbsession.query(Chord).count()
+    }
+
+
 @app.route('/')
 def index():
-    return render_template('index.html', chords=_get_all_chords(), sel_chords=_get_selected_chords())
+    page_data = {
+        'chords':_get_all_chords(),
+        'sel_chords': _get_selected_chords(),
+        'stats': _get_stats()
+    }
+    return render_template('index.html', **page_data)
 
 
 @app.route('/search', methods=['GET'])
@@ -57,7 +69,8 @@ def search():
         'elapsed': elapsed,
         'chords': _get_all_chords(),
         'sel_chords': _get_selected_chords(),
-        'pagination': Pagination(_get_current_page(), PAGE_SIZE, total_count)
+        'pagination': Pagination(_get_current_page(), PAGE_SIZE, total_count),
+        'stats': _get_stats()
     }
     return render_template('search_results.html', **page_data)
 
