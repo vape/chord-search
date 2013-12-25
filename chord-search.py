@@ -1,15 +1,20 @@
 from datetime import datetime
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for, send_from_directory
 from lib.pagination import Pagination
 from orm import dbsession, Chord, Song
 from sqlalchemy import not_
 from lib.template_helpers import url_for_other_page
-
+from os import path
 
 app = Flask(__name__)
 app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 PAGE_SIZE = 10
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(path.join(app.root_path, 'static'), 'img/favicon.png')
 
 
 def _get_selected_chords():
