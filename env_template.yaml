@@ -3,4 +3,4 @@ dbconfig:
   DBNAME: --
   DBUSER: --
   DBPASS: --
-  DBPORT: '5432'
+  DBPORT: 5432

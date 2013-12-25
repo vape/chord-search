@@ -19,4 +19,5 @@ def initialize_config(config_file_name='env.yaml'):
     
     with open(config_file_path, 'r') as config_file:
         config = yaml.load(config_file)
+        config['dbconfig']['DBPORT'] = str(config['dbconfig']['DBPORT'])
         environ.update(config['dbconfig'])
