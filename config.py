@@ -2,10 +2,10 @@ import yaml
 from os import path, environ
 
 def contains(small, big):
-    for i in range(1 + len(big) - len(small)):
-        if small == big[i:i+len(small)]:
-            return i, i + len(small) - 1
-    return False
+    for v in small:
+        if v not in big:
+            return False
+    return True
 
 def is_debug():
     return environ.get('DEBUG', 'False') != 'False'
