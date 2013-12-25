@@ -20,9 +20,9 @@ headers = {
 vote_map = {'poor': 1, 'not so good': 2, 'worth learning': 3, 'accurate': 4, 'excellent!': 5}
 
 
-def get_sitemaps():
+def get_sitemaps(frm):
     root = ET.fromstring(ns_clean_re.sub('', get('http://www.ultimate-guitar.com/sitemap.xml', headers=headers).text))
-    return [l.text for l in root.findall('sitemap/loc') if search(r'sitemap\d+\.xml$', l.text)]
+    return [l.text for l in root.findall('sitemap/loc') if search(r'sitemap(\d+)\.xml$', l.text) and int(search(r'sitemap(\d+)\.xml$', l.text).group(1)) >= frm]
 
 
 def get_song_page_urls(sitemap_url, from_date):
@@ -100,6 +100,7 @@ def report_progress(num_songs, song_index, song_url, start_time):
 def _parse_args():
     parser = ArgumentParser()
     parser.add_argument('mode', choices=['latest', 'full'], default='latest')
+    parser.add_argument('--from', type=int, default=0, dest='frm')
     return parser.parse_args()
 
 
@@ -121,9 +122,10 @@ def _get_song_urls(mode, sitemaps):
 
 def main():
     args = _parse_args()
+    print('Doing {0} indexing.'.format(args.mode))
     job_start_date = datetime.now()
 
-    for urls in _get_song_urls(args.mode, get_sitemaps()):
+    for urls in _get_song_urls(args.mode, get_sitemaps(args.frm)):
         num_songs = len(urls)
         songs = []
         start_time = datetime.now()
