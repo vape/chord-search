@@ -12,6 +12,8 @@ def is_debug():
 
 def initialize_config(config_file_name='env.yaml'):
     config_keys = ['DBSERVER', 'DBNAME', 'DBUSER', 'DBPASS', 'DBPORT']
+    print(config_keys)
+    print(list(environ.keys()))
     if contains(config_keys, list(environ.keys())):
         environ['DEBUG'] = 'False'
         return
