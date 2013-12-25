@@ -6,7 +6,6 @@ from re import search, compile
 from bs4 import BeautifulSoup
 from orm import dbsession, Song, Chord, IndexingJob
 from sqlalchemy import desc
-from sys import stdout
 from os import path
 from argparse import ArgumentParser
 
@@ -68,6 +67,8 @@ def index_chords(songs):
 
 def index_songs(songs):
     all_chords = index_chords(songs)
+    print('Indexing {0} songs.'.format(len(songs)))
+    song_index_start = datetime.now()
     for s in songs:
         try:
             if not s[1]:
@@ -82,19 +83,20 @@ def index_songs(songs):
             print('some error:', ex)
 
     dbsession.commit()
+    song_index_end = datetime.now()
+    print('Indexed {0} songs. Elapsed: {1:.2f} minutes.'.format(len(songs), (song_index_end - song_index_start).total_seconds() / 60))
 
 
 def report_progress(num_songs, song_index, song_url, start_time):
     elapsed = (datetime.now() - start_time).total_seconds()
     time_per_song = elapsed / (song_index + 1)
     est_time_remaining = (num_songs - (song_index + 1)) * time_per_song / 60
-    stdout.write('\rSong {0} of {1}. Elapsed: {2:.2f} min. Remaining: {3:.2f} min. Last song: {4}.'.format(
+    print('Song {0} of {1}. Elapsed: {2:.2f} min. Remaining: {3:.2f} min. Last song: {4}.'.format(
         song_index + 1,
         num_songs,
         elapsed / 60,
         est_time_remaining,
         path.splitext(path.basename(song_url))[0]))
-    stdout.flush()
 
 
 def _parse_args():
@@ -117,19 +119,23 @@ def _get_song_urls(mode, sitemaps):
     last_run_date = _get_last_run_date(mode)
     sitemaps = [sitemaps[-1]] if mode == 'latest' else sitemaps[::-1]
     for s in sitemaps:
+        print('Getting songs from sitemap {0}.'.format(path.basename(s)))
         yield get_song_page_urls(s, last_run_date)
 
 
 def main():
     args = _parse_args()
-    print('Doing {0} indexing.'.format(args.mode))
     job_start_date = datetime.now()
+    print('Doing {0} indexing.'.format(args.mode))
+
+    total_song_count = 0
 
     for urls in _get_song_urls(args.mode, get_sitemaps(args.frm)):
         num_songs = len(urls)
+        total_song_count += num_songs
         songs = []
         start_time = datetime.now()
-        for i, u in enumerate(urls):
+        for i, u in enumerate(urls[:20]):
             songs.append(get_song_data(u))
             report_progress(num_songs, i, u, start_time)
 
@@ -137,6 +143,7 @@ def main():
 
     dbsession.add(IndexingJob(run_date=job_start_date))
     dbsession.commit()
+    print('Indexing finished. {0} songs indexed.'.format(total_song_count))
 
 
 if __name__ == '__main__':
