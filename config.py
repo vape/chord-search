@@ -9,7 +9,7 @@ def contains(small, big):
 
 def initialize_config(config_file_name='env.yaml'):
     config_keys = ['DBSERVER', 'DBNAME', 'DBUSER', 'DBPASS', 'DBPORT']
-    if contains(config_keys, environ.keys()):
+    if contains(config_keys, list(environ.keys())):
         return
 
     config_file_path = path.join(path.dirname(path.abspath(__file__)), config_file_name)
