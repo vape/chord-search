@@ -38,8 +38,10 @@ def get_song_data(song_url):
             return None, None
 
         soup = BeautifulSoup(r.text)
-        chords = list(set([c.text for c in soup.select('#cont span')]))
+        chords = list(set([c.text.strip() for c in soup.select('#cont span')]))
         title = song_title_clean_re.sub('', soup.select('.t_title h1')[0].text)
+        if 'ukulele' in title.lower():
+            return None, None
         artist = soup.select('.t_autor a')[0].text
         rating = vote_map.get(soup.select('.vote-success')[0].text, None)
         song = Song(artist=artist, name=title, url=song_url, rating=rating, created_date=datetime.now())
