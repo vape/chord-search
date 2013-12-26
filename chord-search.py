@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, url_for, send_from_directory
 from lib.pagination import Pagination
 from orm import dbsession, Chord, Song
-from sqlalchemy import not_
+from sqlalchemy import not_, or_
 from lib.template_helpers import url_for_other_page
 from os import path
 from config import is_debug
@@ -37,9 +37,11 @@ def _search(q, chords, page=1):
     if not q and not chords:
         return [], 0, 0
     st = datetime.now()
-    q1 = dbsession.query(Song).join(Song.chords).filter(Chord.id.in_(chords))
+    q1 = dbsession.query(Song)
+    if chords:
+        q1 = q1.join(Song.chords).filter(Chord.id.in_(chords))
     if q:
-        q1 = q1.filter(Song.name.like('%{0}%'.format(q) or Song.artist.like('%{0}%'.format(q))))
+        q1 = q1.filter(or_(Song.name.ilike('%{0}%'.format(q)), Song.artist.ilike('%{0}%'.format(q))))
     q2 = dbsession.query(Song).join(Song.chords).filter(not_(Chord.id.in_(chords))) if len(chords) > 1 else None
     q = q1.except_(q2) if q2 else q1
     cnt = q.count()
