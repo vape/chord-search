@@ -4,8 +4,8 @@
 <div class="row">
     <div class="input-group col-lg-8 center-block">
         <div class="panel panel-default">
-            <div class="panel-body">
-                {{ total_count }} results ({{ "%.3f"|format(elapsed) }} seconds)
+            <div class="panel-body search-result-summary-panel">
+                {{ total_count }} result{{ 's' if total_count > 1 else '' }} ({{ "%.3f"|format(elapsed) }} seconds)
             </div>
         </div>
     </div>

@@ -17,3 +17,7 @@ ul.search-results {
 .panel-body {
     padding: 10px 20px;
 }
+
+.search-result-summary-panel {
+    color: #999;
+}
