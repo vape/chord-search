@@ -21,7 +21,9 @@
     {% endfor %}
 </ul>
 
+{% if pagination.pages > 1 %}
 <div class="row">
     {{ pgn.render_pagination(pagination) }}
 </div>
+{% endif %}
 {% endblock %}
