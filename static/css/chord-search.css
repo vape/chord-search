@@ -10,6 +10,16 @@ ul.search-results {
     list-style-type: none;
 }
 
+ul.search-results li div {
+    display: inline-block;
+}
+
+ul.search-results li:before {
+    content: '\2669';
+    margin-right: 5px;
+    font-size: x-large;
+}
+
 #search {
     margin-bottom: 10px;
 }
