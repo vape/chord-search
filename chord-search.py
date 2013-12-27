@@ -1,15 +1,18 @@
 from datetime import datetime
 
-from flask import Flask, render_template, request, url_for, send_from_directory
+from flask import Flask, render_template, request, send_from_directory
 from lib.pagination import Pagination
 from orm import dbsession, Chord, Song
 from sqlalchemy import not_, or_
 from lib.template_helpers import url_for_other_page
 from os import path
 from config import is_debug
+from flask_babel import Babel
 
 app = Flask(__name__)
 app.jinja_env.globals['url_for_other_page'] = url_for_other_page
+babel = Babel(app)
+
 PAGE_SIZE = 10
 
 
