@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Chord Search ♫</title>
+    <title>Chord Search ♫{{ ' - query: "{0}"'.format(query) if query else '' }}{{ ' - chords: "{0}"'.format(chord_names) if chord_names else '' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.min.css') }}">

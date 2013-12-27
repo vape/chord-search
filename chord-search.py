@@ -47,7 +47,8 @@ def _search(q, chords, page=1):
     cnt = q.count()
     res = q.limit(PAGE_SIZE).offset((page-1) * PAGE_SIZE).all()
     end = datetime.now()
-    return res, cnt, (end - st).total_seconds()
+    chord_names = [c[0] for c in dbsession.query(Chord.name).filter(Chord.id.in_(chords)).order_by(Chord.name)] if chords else []
+    return res, chord_names, cnt, (end - st).total_seconds()
 
 
 def _get_stats():
@@ -69,9 +70,11 @@ def index():
 
 @app.route('/search', methods=['GET'])
 def search():
-    results, total_count, elapsed = _search(request.args.get('q'), list(map(int, request.args.getlist('crd'))),
+    results, chords, total_count, elapsed = _search(request.args.get('q'), list(map(int, request.args.getlist('crd'))),
                                             _get_current_page())
     page_data = {
+        'query': request.args.get('q'),
+        'chord_names': ', '.join(chords) if chords else '',
         'results': results,
         'total_count': total_count,
         'elapsed': elapsed,
