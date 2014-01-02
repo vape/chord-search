@@ -106,5 +106,4 @@ def search():
 
 
 if __name__ == '__main__':
-    print(is_debug())
     app.run(debug=is_debug(), use_reloader=False)
