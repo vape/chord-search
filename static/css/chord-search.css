@@ -10,16 +10,6 @@ ul.search-results {
     list-style-type: none;
 }
 
-ul.search-results li div {
-    display: inline-block;
-}
-
-ul.search-results li:before {
-    content: '\2669';
-    margin-right: 5px;
-    font-size: x-large;
-}
-
 #search {
     margin-bottom: 10px;
 }
@@ -34,15 +24,30 @@ ul.search-results li:before {
 
 .search-results h3 {
     margin-bottom: 0;
+    display: inline-block;
 }
 
 .search-results cite {
     color: #006621;
     display: block;
-    margin-left: 20px;
+    margin-left: 19px;
 }
 
 .search-results .well {
     padding: 5px;
     margin: 3px 0px;
+}
+
+.search-results .song-chords {
+    margin-left: 19px;
+}
+
+.search-results .song-chord {
+    display: inline-block;
+}
+
+.search-results .song-rating {
+    margin-left: 5px;
+    font-size: larger;
+    color: #777;
 }

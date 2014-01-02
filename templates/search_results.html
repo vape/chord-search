@@ -14,13 +14,20 @@
 <ul class="search-results">
     {% for res in results %}
     <li>
-        <div>
-            <h3><a target="_blank" title="{{ res.name }} by {{ res.artist }}" href="{{ res.url }}">{{ res.name }} by {{res.artist }}</a></h3>
+        <div class="l">
+            <h3><span>&#x2669;</span> <a target="_blank" title="{{ res.name }} by {{ res.artist }}" href="{{ res.url }}">{{ res.name }} by {{res.artist }}</a></h3>
+            <span class="song-rating" title="Rating: {{ res.rating }}">
+            {% for r in range(0, res.rating or 0) %}
+              <span class="glyphicon glyphicon-star"></span>
+            {% endfor %}
+            </span>
+            <div class="song-chords">
             {% for ch in res.chords %}
-            <div class="well well-sm" title="{{ ch.name }}">
+            <div class="well well-sm song-chord" title="{{ ch.name }}">
                 {{ ch.name }}
             </div>
             {% endfor %}
+            </div>
         </div>
         <cite>{{ res.url }}</cite>
     </li>
