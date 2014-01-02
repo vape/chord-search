@@ -6,6 +6,20 @@
         <div class="panel panel-default">
             <div class="panel-body search-result-summary-panel">
                 {{ total_count }} result{{ 's' if total_count > 1 else '' }} ({{ "%.3f"|format(elapsed) }} seconds)
+                <div class="pull-right">
+                    <div class="btn-group btn-group-xs">
+                        <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                            Order by
+                            <span class="caret"></span>
+                            <span class="sr-only">Order by</span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{{ url_for_other_page(1, 'song') }}">Song Name</a></li>
+                            <li><a href="{{ url_for_other_page(1, 'artist') }}">Artist Name</a></li>
+                            <li><a href="{{ url_for_other_page(1, 'rating') }}">Song Rating</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -15,18 +29,20 @@
     {% for res in results %}
     <li>
         <div class="l">
-            <h3><span>&#x2669;</span> <a target="_blank" title="{{ res.name }} by {{ res.artist }}" href="{{ res.url }}">{{ res.name }} by {{res.artist }}</a></h3>
+            <h3><span>&#x2669;</span> <a target="_blank" title="{{ res.name }} by {{ res.artist }}"
+                                         href="{{ res.url }}">{{ res.name }} by {{res.artist }}</a></h3>
             <span class="song-rating" title="Rating: {{ res.rating }}">
             {% for r in range(0, res.rating or 0) %}
               <span class="glyphicon glyphicon-star"></span>
             {% endfor %}
             </span>
+
             <div class="song-chords">
-            {% for ch in res.chords %}
-            <div class="well well-sm song-chord" title="{{ ch.name }}">
-                {{ ch.name }}
-            </div>
-            {% endfor %}
+                {% for ch in res.chords %}
+                <div class="well well-sm song-chord" title="{{ ch.name }}">
+                    {{ ch.name }}
+                </div>
+                {% endfor %}
             </div>
         </div>
         <cite>{{ res.url }}</cite>

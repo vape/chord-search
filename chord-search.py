@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, send_from_directory
 from lib.pagination import Pagination
 from orm import dbsession, Chord, Song
-from sqlalchemy import not_, or_
+from sqlalchemy import not_, or_, desc, asc
 from lib.template_helpers import url_for_other_page
 from os import path
 from config import is_debug
@@ -36,7 +36,17 @@ def _get_current_page():
         return 1
 
 
-def _search(q, chords, page=1):
+def _get_order_by(sort):
+    if sort == 'artist':
+        return asc(Song.artist)
+    elif sort == 'song':
+        return asc(Song.name)
+    elif sort == 'rating':
+        return desc(Song.rating)
+    return None
+
+
+def _search(q, chords, page=1, sort=None):
     if not q and not chords:
         return [], 0, 0
     st = datetime.now()
@@ -47,10 +57,14 @@ def _search(q, chords, page=1):
         q1 = q1.filter(or_(Song.name.ilike('%{0}%'.format(q)), Song.artist.ilike('%{0}%'.format(q))))
     q2 = dbsession.query(Song).join(Song.chords).filter(not_(Chord.id.in_(chords))) if len(chords) > 1 else None
     q = q1.except_(q2) if q2 else q1
+    ob = _get_order_by(sort)
+    if ob:
+        q = q.order_by(ob)
     cnt = q.count()
-    res = q.limit(PAGE_SIZE).offset((page-1) * PAGE_SIZE).all()
+    res = q.limit(PAGE_SIZE).offset((page - 1) * PAGE_SIZE).all()
     end = datetime.now()
-    chord_names = [c[0] for c in dbsession.query(Chord.name).filter(Chord.id.in_(chords)).order_by(Chord.name)] if chords else []
+    chord_names = [c[0] for c in
+                   dbsession.query(Chord.name).filter(Chord.id.in_(chords)).order_by(Chord.name)] if chords else []
     return res, chord_names, cnt, (end - st).total_seconds()
 
 
@@ -64,7 +78,7 @@ def _get_stats():
 @app.route('/')
 def index():
     page_data = {
-        'chords':_get_all_chords(),
+        'chords': _get_all_chords(),
         'sel_chords': _get_selected_chords(),
         'stats': _get_stats()
     }
@@ -73,8 +87,10 @@ def index():
 
 @app.route('/search', methods=['GET'])
 def search():
-    results, chords, total_count, elapsed = _search(request.args.get('q'), list(map(int, request.args.getlist('crd'))),
-                                            _get_current_page())
+    results, chords, total_count, elapsed = _search(request.args.get('q'),
+                                                    list(map(int, request.args.getlist('crd'))),
+                                                    _get_current_page(),
+                                                    request.args.get('s'))
     page_data = {
         'query': request.args.get('q'),
         'chord_names': ', '.join(chords) if chords else '',
