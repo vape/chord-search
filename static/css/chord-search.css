@@ -41,3 +41,8 @@ ul.search-results li:before {
     display: block;
     margin-left: 20px;
 }
+
+.search-results .well {
+    padding: 5px;
+    margin: 3px 0px;
+}

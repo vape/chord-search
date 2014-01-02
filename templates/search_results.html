@@ -16,6 +16,11 @@
     <li>
         <div>
             <h3><a target="_blank" title="{{ res.name }} by {{ res.artist }}" href="{{ res.url }}">{{ res.name }} by {{res.artist }}</a></h3>
+            {% for ch in res.chords %}
+            <div class="well well-sm" title="{{ ch.name }}">
+                {{ ch.name }}
+            </div>
+            {% endfor %}
         </div>
         <cite>{{ res.url }}</cite>
     </li>
