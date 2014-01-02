@@ -31,3 +31,13 @@ ul.search-results li:before {
 .search-result-summary-panel {
     color: #999;
 }
+
+.search-results h3 {
+    margin-bottom: 0;
+}
+
+.search-results cite {
+    color: #006621;
+    display: block;
+    margin-left: 20px;
+}
