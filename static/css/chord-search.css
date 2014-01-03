@@ -2,6 +2,10 @@
     display: inline-block;
 }
 
+#crd {
+    width: 92%;
+}
+
 .input-group {
     margin-top: 10px;
 }

@@ -21,12 +21,12 @@
 
 <div class="container">
     <div class="row" id="search">
-        <form role="form" class="form-horizontal" method="get" action="{{ url_for('search') }}">
+        <form role="form" id="search-form" class="form-horizontal" method="get" action="{{ url_for('search') }}">
             <div class="input-group col-lg-6 center-block">
                 <input type="text" class="form-control input-lg" id="q" name="q" placeholder="Artist or song name (optional)" value="{{ request.args.get('q', '') }}" tabindex="1">
             </div>
             <div class="input-group col-lg-6 center-block">
-                <select multiple name="crd" id="crd" style="width: 92%" tabindex="2">
+                <select multiple name="crd" id="crd" tabindex="2" required>
                     {% for ch in chords %}
                     <option value="{{ ch.id }}" {{ 'selected' if ch.id in sel_chords else '' }}>{{ ch.name }}</option>
                     {% endfor %}
@@ -42,6 +42,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.0.3.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.validate.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/chord-search.js') }}"></script>
 </body>
 </html>
