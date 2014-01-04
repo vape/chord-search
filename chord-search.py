@@ -38,12 +38,12 @@ def _get_current_page():
 
 def _get_order_by(sort):
     if sort == 'artist':
-        return asc(Song.artist)
+        return Song.artist, asc
     elif sort == 'song':
-        return asc(Song.name)
+        return Song.name, asc
     elif sort == 'rating':
-        return desc(Song.rating)
-    return None
+        return Song.rating, desc
+    return None, None
 
 
 def _search(q, chords, page=1, sort=None):
@@ -57,9 +57,11 @@ def _search(q, chords, page=1, sort=None):
         q1 = q1.filter(or_(Song.name.ilike('%{0}%'.format(q)), Song.artist.ilike('%{0}%'.format(q))))
     q2 = dbsession.query(Song).join(Song.chords).filter(not_(Chord.id.in_(chords))) if len(chords) > 1 else None
     q = q1.except_(q2) if q2 else q1
-    ob = _get_order_by(sort)
-    if ob:
-        q = q.order_by(ob)
+    ord_by, ord_func = _get_order_by(sort)
+    if ord_by:
+        q = q.order_by(ord_func(ord_by))
+        if ord_by == Song.rating:
+            q = q.filter(Song.rating != None)
     cnt = q.count()
     res = q.limit(PAGE_SIZE).offset((page - 1) * PAGE_SIZE).all()
     end = datetime.now()
