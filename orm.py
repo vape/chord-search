@@ -24,7 +24,7 @@ class Song(Base):
     url = Column(String(length=200), nullable=False, unique=True, index=True)
     rating = Column(Integer())
     created_date = Column(DateTime(), nullable=False, index=True)
-    chords = relationship('Chord', secondary=song_chord, backref='songs')
+    chords = relationship('Chord', secondary=song_chord, backref='songs', lazy='joined')
 
     def __str__(self):
         return '"{0}" by {1}'.format(self.name, self.artist)
