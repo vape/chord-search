@@ -17,6 +17,8 @@ babel = Babel(app)
 PAGE_SIZE = 10
 
 exclude_re = compile(r'(-[a-z0-9]+)', RE_IGNORECASE)
+specific_re = compile(r'([a-z0-9]+):([a-z0-9]+)', RE_IGNORECASE)
+DEFINED_CRITERIA = ['artist', 'song']
 
 
 @app.route('/favicon.ico')
@@ -53,14 +55,34 @@ def _parse_query(q):
     parsed = dict()
     if not q:
         return parsed
-    exclude_words = exclude_re.findall(q)
-    if exclude_words:
-        parsed['exclude'] = list(map(lambda x: x.strip('-'), exclude_words))
-        q = exclude_re.sub('', q, RE_IGNORECASE).strip()
+
+    parsed['exclude'] = list(map(lambda x: x.strip('-'), exclude_re.findall(q)))
+    q = exclude_re.sub('', q, RE_IGNORECASE).strip()
+
+    specific_criteria = [c for c in specific_re.findall(q) if isinstance(c, tuple) and c[0] in DEFINED_CRITERIA]
+    for c in specific_criteria:
+        crits = parsed.get(c[0], [])
+        crits.append(c[1])
+        parsed[c[0]] = crits
+
+    q = specific_re.sub('', specific_re.sub('', q, RE_IGNORECASE), RE_IGNORECASE).strip()
 
     parsed['q'] = q
 
     return parsed
+
+
+def _apply_extra_criteria(q_obj, parsed_query):
+    if parsed_query.get('q', ''):
+        query = parsed_query.get('q')
+        q_obj = q_obj.filter(or_(Song.name.ilike('%{0}%'.format(query)), Song.artist.ilike('%{0}%'.format(query))))
+    for exc in parsed_query.get('exclude', []):
+        q_obj = q_obj.filter(and_(not_(Song.name.ilike('%{0}%'.format(exc))), not_(Song.artist.ilike('%{0}%'.format(exc)))))
+    for ats in parsed_query.get('artist', []):
+        q_obj = q_obj.filter(Song.artist.ilike('%{0}%'.format(ats)))
+    for sng in parsed_query.get('song', []):
+        q_obj = q_obj.filter(Song.name.ilike('%{0}%'.format(sng)))
+    return q_obj
 
 
 def _search(q, chords, page=1, sort=None):
@@ -72,11 +94,7 @@ def _search(q, chords, page=1, sort=None):
     q1 = dbsession.query(Song)
     if chords:
         q1 = q1.join(Song.chords).filter(Chord.id.in_(chords))
-    if parsed_query.get('q', ''):
-        query = parsed_query.get('q')
-        q1 = q1.filter(or_(Song.name.ilike('%{0}%'.format(query)), Song.artist.ilike('%{0}%'.format(query))))
-    for exc in parsed_query.get('exclude', []):
-        q1 = q1.filter(and_(not_(Song.name.ilike('%{0}%'.format(exc))), not_(Song.artist.ilike('%{0}%'.format(exc)))))
+    q1 = _apply_extra_criteria(q1, parsed_query)
     q2 = dbsession.query(Song).join(Song.chords).filter(not_(Chord.id.in_(chords))) if len(chords) > 1 else None
     q = q1.except_(q2) if q2 else q1
     ord_by, ord_func = _get_order_by(sort)
