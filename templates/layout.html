@@ -26,12 +26,8 @@
                 <input type="text" class="form-control input-lg" id="q" name="q" placeholder="Artist or song name (optional)" value="{{ request.args.get('q', '') }}" tabindex="1">
             </div>
             <div class="input-group col-lg-6 center-block">
-                <select multiple name="crd" id="crd" tabindex="2" required>
-                    {% for ch in chords %}
-                    <option value="{{ ch.id }}" {{ 'selected' if ch.id in sel_chords else '' }}>{{ ch.name }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-primary" tabindex="3" title="Search"><span class="glyphicon glyphicon-search"></span></button>
+                <input type="hidden" name="crd" id="crd" tabindex="2" style="width: 92%;" value="{{ selected_chords|safe }}" required>
+                <button type="submit" class="btn btn-primary" id="search-button" tabindex="3" title="Search"><span class="glyphicon glyphicon-search"></span></button>
             </div>
         </form>
     </div>

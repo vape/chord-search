@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, jsonify
 from lib.pagination import Pagination
 from orm import dbsession, Chord, Song
 from sqlalchemy import not_, or_, and_, desc, asc
@@ -27,11 +27,7 @@ def favicon():
 
 
 def _get_selected_chords():
-    return list(map(int, request.args.getlist('crd')))
-
-
-def _get_all_chords():
-    return dbsession.query(Chord).order_by(Chord.name).all()
+    return list(map(int, request.args.get('crd', '').split(',')))
 
 
 def _get_current_page():
@@ -88,7 +84,7 @@ def _apply_extra_criteria(q_obj, parsed_query):
 def _search(q, chords, page=1, sort=None):
     parsed_query = _parse_query(q)
     if not parsed_query and not chords:
-        return [], 0, 0
+        return [], [], 0, 0
 
     st = datetime.now()
     q1 = dbsession.query(Song)
@@ -105,9 +101,9 @@ def _search(q, chords, page=1, sort=None):
     cnt = q.count()
     res = q.limit(PAGE_SIZE).offset((page - 1) * PAGE_SIZE).all()
     end = datetime.now()
-    chord_names = [c[0] for c in
-                   dbsession.query(Chord.name).filter(Chord.id.in_(chords)).order_by(Chord.name)] if chords else []
-    return res, chord_names, cnt, (end - st).total_seconds()
+    selected_chords = [{'id': c[0], 'name': c[1]} for c in
+                   dbsession.query(Chord.id, Chord.name).filter(Chord.id.in_(chords)).order_by(Chord.name)] if chords else []
+    return res, selected_chords, cnt, (end - st).total_seconds()
 
 
 def _get_stats():
@@ -120,27 +116,34 @@ def _get_stats():
 @app.route('/')
 def index():
     page_data = {
-        'chords': _get_all_chords(),
-        'sel_chords': _get_selected_chords(),
         'stats': _get_stats()
     }
     return render_template('index.html', **page_data)
 
 
+@app.route('/chord_filter', methods=['GET'])
+def chord_filter():
+    q = request.args.get('q')
+    if not q:
+        return jsonify([])
+
+    r = dbsession.query(Chord.id, Chord.name).filter(Chord.name.ilike('{0}%'.format(q))).order_by(Chord.name).all()
+    return jsonify(results=[{'id': x[0], 'name': x[1]} for x in r])
+
+
 @app.route('/search', methods=['GET'])
 def search():
     results, chords, total_count, elapsed = _search(request.args.get('q'),
-                                                    list(map(int, request.args.getlist('crd'))),
+                                                    list(map(int, request.args.get('crd', '').split(','))) if request.args.get('crd', '') else [],
                                                     _get_current_page(),
                                                     request.args.get('s'))
     page_data = {
         'query': request.args.get('q'),
-        'chord_names': ', '.join(chords) if chords else '',
+        'chord_names': ', '.join([c['name'] for c in chords]) if chords else '',
+        'selected_chords': chords,
         'results': results,
         'total_count': total_count,
         'elapsed': elapsed,
-        'chords': _get_all_chords(),
-        'sel_chords': _get_selected_chords(),
         'pagination': Pagination(_get_current_page(), PAGE_SIZE, total_count),
         'stats': _get_stats()
     }

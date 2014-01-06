@@ -18,6 +18,10 @@ ul.search-results {
     margin-bottom: 10px;
 }
 
+#search-button{
+    margin-left: 5px;
+}
+
 .panel-body {
     padding: 10px 20px;
 }
