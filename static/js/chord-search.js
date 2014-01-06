@@ -6,7 +6,10 @@ $(document).ready(function () {
         width: 'element',
         placeholder: 'Chords',
         openOnEnter: false,
-        allowClear: true
+        allowClear: true,
+        matcher: function(term, text) {
+            return text.toUpperCase().indexOf(term.toUpperCase()) == 0;
+        }
     });
     var validator = $('#search-form').validate(
         {
