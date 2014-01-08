@@ -8,7 +8,6 @@ def cached(key, redis):
         def decorated_function(*args, **kwargs):
             rv = redis.get(key)
             if rv is not None:
-                print(rv)
                 return loads(rv)
             rv = f(*args, **kwargs)
             redis.set(key, dumps(rv))
