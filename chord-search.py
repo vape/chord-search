@@ -17,17 +17,20 @@ app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 babel = Babel(app)
 rds = StrictRedis(host=environ['REDISHOST'], port=int(environ['REDISPORT']), password=environ['REDISPASS'])
 
-
-PAGE_SIZE = 10
-
 exclude_re = compile(r'(-[a-z0-9]+)', RE_IGNORECASE)
 specific_re = compile(r'([a-z0-9]+):([a-z0-9]+)', RE_IGNORECASE)
 DEFINED_CRITERIA = ['artist', 'song']
+PAGE_SIZE = 10
 
 
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(path.join(app.root_path, 'static'), 'img/favicon.png')
+
+
+@cached('all_chords', rds)
+def _get_all_chords():
+    return [{'id': c[0], 'name': c[1]} for c in dbsession.query(Chord.id, Chord.name).all()]
 
 
 def _get_selected_chords():
@@ -129,11 +132,8 @@ def index():
 @app.route('/chord_filter', methods=['GET'])
 def chord_filter():
     q = request.args.get('q')
-    if not q:
-        return jsonify([])
-
-    r = dbsession.query(Chord.id, Chord.name).filter(Chord.name.ilike('{0}%'.format(q))).order_by(Chord.name).all()
-    return jsonify(results=[{'id': x[0], 'name': x[1]} for x in r])
+    r = [c for c in _get_all_chords() if c['name'].lower().startswith(q.lower())] if q else []
+    return jsonify(results=r)
 
 
 @app.route('/search', methods=['GET'])
