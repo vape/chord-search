@@ -1,18 +1,22 @@
 from datetime import datetime
-
 from flask import Flask, render_template, request, send_from_directory, jsonify
+from lib.decorators import cached
 from lib.pagination import Pagination
 from orm import dbsession, Chord, Song
+from redis import StrictRedis
 from sqlalchemy import not_, or_, and_, desc, asc
 from lib.template_helpers import url_for_other_page
-from os import path
+from os import path, environ
 from re import compile, IGNORECASE as RE_IGNORECASE
 from config import is_debug
 from flask_babel import Babel
 
+
 app = Flask(__name__)
 app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 babel = Babel(app)
+rds = StrictRedis(host=environ['REDISHOST'], port=int(environ['REDISPORT']), password=environ['REDISPASS'])
+
 
 PAGE_SIZE = 10
 
@@ -106,6 +110,7 @@ def _search(q, chords, page=1, sort=None):
     return res, selected_chords, cnt, (end - st).total_seconds()
 
 
+@cached('stats', rds)
 def _get_stats():
     return {
         'song_count': dbsession.query(Song).count(),

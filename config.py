@@ -14,7 +14,7 @@ def is_debug():
 
 
 def initialize_config(config_file_name='env.yaml'):
-    config_keys = ['DBSERVER', 'DBNAME', 'DBUSER', 'DBPASS', 'DBPORT']
+    config_keys = ['DBSERVER', 'DBNAME', 'DBUSER', 'DBPASS', 'DBPORT', 'REDISHOST', 'REDISPORT', 'REDISPASS']
     if contains(config_keys, list(environ.keys())):
         environ['DEBUG'] = 'False'
         return
@@ -27,5 +27,7 @@ def initialize_config(config_file_name='env.yaml'):
     with open(config_file_path, 'r') as config_file:
         config = yaml.load(config_file)
         config['dbconfig']['DBPORT'] = str(config['dbconfig']['DBPORT'])
+        config['redisconfig']['REDISPORT'] = str(config['redisconfig']['REDISPORT'])
         environ.update(config['dbconfig'])
+        environ.update(config['redisconfig'])
         environ['DEBUG'] = 'True'

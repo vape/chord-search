@@ -5,3 +5,8 @@ dbconfig:
   DBPASS: --
   DBPORT: 5432
 
+
+redisconfig:
+  REDISHOST: -
+  REDISPORT: 19000
+  REDISPASS: -
