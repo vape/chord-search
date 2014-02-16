@@ -26,7 +26,7 @@
                 <input type="text" class="form-control input-lg" id="q" name="q" placeholder="Artist or song name (optional)" value="{{ request.args.get('q', '') }}" tabindex="1">
             </div>
             <div class="input-group col-lg-6 center-block">
-                <input type="hidden" name="crd" id="crd" tabindex="2" style="width: 92%;" value="{{ selected_chords|safe }}" required>
+                <input type="hidden" name="crd" id="crd" tabindex="2" style="width: 90%;" value="{{ selected_chords|safe }}" required>
                 <button type="submit" class="btn btn-primary" id="search-button" tabindex="3" title="Search"><span class="glyphicon glyphicon-search"></span></button>
             </div>
         </form>
